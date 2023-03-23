@@ -28,9 +28,9 @@ def thread_it(func):
             bound_args.apply_defaults()
             bound_args_dict = bound_args.arguments
 
-            new_kwargs = {k:v for k, v in bound_args_dict.items() if k not in ('self')}
+            new_kwargs = {k:v for k, v in bound_args_dict.items()}
 
-            thread = threading.Thread(target = func, args = new_kwargs)
+            thread = threading.Thread(target = func, kwargs = new_kwargs)
             thread.start()
             return thread
         return pass_to_thread
@@ -51,7 +51,7 @@ def get_servo(ID, servo_type):
 
 class Servo:
     def __init__(self, name, channel):
-        self.servo = get_servo(channel, 'positional')
+        self.servo = get_servo(channel, servo_type = 'positional')
         self.name = name
     def set_angle(self, angle):
         if angle < 0 or angle >180:
@@ -64,7 +64,7 @@ class Servo:
 class ContinuousServo:
     def __init__(self, name, channel, stop_value = 0, forward = 0.08, backward = 0):
         self.name = name
-        self.servo = get_servo(channel, type = 'continuous')
+        self.servo = get_servo(channel, servo_type = 'continuous')
         self.stop_throttle = stop_value
         self.forward_throttle = forward
         self.backward_throttle = backward
@@ -98,19 +98,27 @@ class SwitchManager:
         self.switches = []
         self.running = True
 
-        self.watch_buttons()
+        self.watch_switches()
 
     def shutdown(self):
         self.running = False
     
     @thread_it
-    def watch_buttons(self):
-        while not self.box.done:
-            for button in self.buttons:
-                if GPIO.input(button.pin) == button.pressed_val:
-                    button.pressed = True
+    def watch_switches(self):
+        while self.running:
+            for switch in self.switches:
+                if GPIO.input(switch.pin) == switch.pressed_val:
+                    if not switch.pressed:
+                        print(f'{switch.name} pressed')
+                    switch.pressed = True
+                    if switch.target_on:
+                        switch.target_on()
+                    
                 else:
-                    button.pressed = False
+                    if switch.pressed:
+                        if switch.target_off:
+                            switch.target_off()
+                    switch.pressed = False
             time.sleep(0.005)
     
     def add_switch(self, switch):
@@ -125,7 +133,7 @@ class SwitchManager:
 
         new_button_obj = Switch(name, pin, pu_pd, target_on, target_off)
         new_button_obj.in_switch_manager = True
-        self.buttons.append(new_button_obj)
+        self.switches.append(new_button_obj)
         return new_button_obj
 
 class Switch:
@@ -147,6 +155,10 @@ class Switch:
         self.target_off = target_off
         self.running = False
         self.in_switch_manager = False
+        
+        #likely could put this in watch_switches
+        if target_on or target_off and not self.in_switch_manager:
+            self.monitor_for_targets
         
     @thread_it
     def monitor_for_targets(self):
