@@ -1,6 +1,6 @@
 
 import time
-import tabulate
+from tabulate import tabulate
 try:
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)
@@ -109,7 +109,8 @@ class SwitchManager:
             for switch in self.switches:
                 if GPIO.input(switch.pin) == switch.pressed_val:
                     if not switch.pressed:
-                        print(f'{switch.name} pressed')
+                        ''''''
+                        #print(f'{switch.name} pressed')
                     switch.pressed = True
                     if switch.target_on:
                         switch.target_on()
@@ -158,7 +159,7 @@ class Switch:
         
         #likely could put this in watch_switches
         if target_on or target_off and not self.in_switch_manager:
-            self.monitor_for_targets
+            self.monitor_for_targets()
         
     @thread_it
     def monitor_for_targets(self):
@@ -201,7 +202,7 @@ class Box:
 def print_pin_status(button_list):
     '''takes a list of buttons, starts up threading, and outputs a tab'''
     try:
-        num_buttons = len(button_list.buttons)
+        num_buttons = len(button_list)
 
         print("\033c", end="")
         
@@ -209,11 +210,11 @@ def print_pin_status(button_list):
         for i in range(0,num_buttons,2):
             
             if i+1<num_buttons:
-                b1 = button_list.buttons[i]
-                b2 = button_list.buttbutton_listons[i+1]
+                b1 = button_list[i]
+                b2 = button_list[i+1]
                 status += [[b1.name, b1.pressed, b2.name, b2.pressed]]
             else:
-                b1 = button_list.buttons[i]
+                b1 = button_list[i]
                 status += [[b1.name, b1.pressed, '', '']]
         print(tabulate(status, headers = ['button', 'status', 'button', 'status']))
         time.sleep(0.05)
