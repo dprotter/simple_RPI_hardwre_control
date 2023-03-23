@@ -5,11 +5,4 @@ d1_fwd = switch_manager.new_switch('door_1_fwd', 27, target_on = s1.forward, tar
 
 
 
-import time
-try:
-    while True:
-        print_pin_status(switch_manager.switches)
-        time.sleep(0.05)
-
-except KeyboardInterrupt:
-    pass
+print_pin_status(switch_manager.switches)

@@ -202,23 +202,24 @@ class Box:
 def print_pin_status(button_list):
     '''takes a list of buttons, starts up threading, and outputs a tab'''
     try:
-        num_buttons = len(button_list)
+        while True:
+            num_buttons = len(button_list)
 
-        print("\033c", end="")
-        
-        status = []
-        for i in range(0,num_buttons,2):
+            print("\033c", end="")
             
-            if i+1<num_buttons:
-                b1 = button_list[i]
-                b2 = button_list[i+1]
-                status += [[b1.name, b1.pressed, b2.name, b2.pressed]]
-            else:
-                b1 = button_list[i]
-                status += [[b1.name, b1.pressed, '', '']]
-        print(tabulate(status, headers = ['button', 'status', 'button', 'status']))
-        time.sleep(0.05)
+            status = []
+            for i in range(0,num_buttons,2):
+                
+                if i+1<num_buttons:
+                    b1 = button_list[i]
+                    b2 = button_list[i+1]
+                    status += [[b1.name, b1.pressed, b2.name, b2.pressed]]
+                else:
+                    b1 = button_list[i]
+                    status += [[b1.name, b1.pressed, '', '']]
+            print(tabulate(status, headers = ['button', 'status', 'button', 'status']))
+            time.sleep(0.01)
     except KeyboardInterrupt:
-        print('exiting tab view')
+        print('\nexiting tab view')
         
 
